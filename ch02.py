@@ -95,3 +95,104 @@ plt.show()
 normed_subset = count_subset.div(count_subset.sum(1), axis=0)
 normed_subset.plot(kind='barh', stacked=True)
 plt.show()
+
+# MovieLens 1M Data Set
+
+unames = ['user_id', 'gender', 'age', 'occupation', 'zip']
+users = pd.read_table('ch02/movielens/users.dat', sep='::', header=None, names=unames)
+
+rnames = ['user_id', 'movie_id', 'rating', 'timestamp']
+ratings = pd.read_table('ch02/movielens/ratings.dat', sep='::', header=None, names=rnames)
+
+mnames = ['movie_id', 'title', 'genres']
+movies = pd.read_table('ch02/movielens/movies.dat', sep='::', header=None, names=mnames)
+
+users[:5]
+ratings[:5]
+movies[:5]
+
+
+ratings
+type(ratings).__name__
+ratings.columns
+ratings.dtypes
+
+data = pd.merge(pd.merge(ratings, users), movies)
+
+type(data).__name__
+data.columns
+data.dtypes
+
+data.ix[0]
+
+mean_ratings = data.pivot_table('rating', rows='title', cols='gender', aggfunc='mean')
+mean_ratings = data.pivot_table('rating', index='title', columns='gender', aggfunc='mean')
+mean_ratings[:5]
+
+ratings_by_title = data.groupby('title').size()
+ratings_by_title[:10]
+active_titles = ratings_by_title.index[ratings_by_title >= 250]
+active_titles
+mean_ratings = mean_ratings.ix[active_titles]
+mean_ratings
+top_female_ratings = mean_ratings.sort_index(by='F', ascending=False)
+top_female_ratings[:10]
+
+mean_ratings['diff'] = mean_ratings['M'] - mean_ratings['F']
+sorted_by_diff = mean_ratings.sort_index(by='diff')
+sorted_by_diff[:15]
+# Reverse order of rows, take first 15 rows
+
+# Standard deviation of rating grouped by title
+rating_std_by_title = data.groupby('title')['rating'].std()
+# Filter down to active_titles
+rating_std_by_title = rating_std_by_title.ix[active_titles]
+# Order Series by value in descending order
+rating_std_by_title.order(ascending=False)[:10]
+
+# US Baby Names 1880-2010
+
+import pandas as pd
+
+names1880 = pd.read_csv('ch02/names/yob1880.txt', names=['name', 'sex', 'births'])
+names1880
+
+names1880.groupby('sex').births.sum()
+
+# 2010 is the last available year right now
+years = range(1880, 2011)
+pieces = []
+columns = ['name', 'sex', 'births']
+for year in years:
+    path = 'ch02/names/yob%d.txt' % year
+    frame = pd.read_csv(path, names=columns)
+    frame['year'] = year
+    pieces.append(frame)
+
+# Concatenate everything into a single DataFrame
+names = pd.concat(pieces, ignore_index=True)
+names
+
+total_births = names.pivot_table('births', rows='year', cols='sex', aggfunc=sum)
+total_births.tail()
+
+total_births.plot(title='Total births by sex and year')
+plt.show()
+
+# Integer division floors
+def add_prop(group):
+    births = group.births.astype(float)
+    group['prop'] = births / births.sum()
+    return group
+
+names = names.groupby(['year', 'sex']).apply(add_prop)
+names
+
+np.allclose(names.groupby(['year', 'sex']).prop.sum(), 1)
+
+def get_top1000(group):
+    return group.sort_index(by='births', ascending=False)[:1000]
+
+grouped = names.groupby(['year', 'sex'])
+top1000 = grouped.apply(get_top1000)
+top1000
