@@ -196,3 +196,38 @@ def get_top1000(group):
 grouped = names.groupby(['year', 'sex'])
 top1000 = grouped.apply(get_top1000)
 top1000
+
+boys = top1000[top1000.sex == 'M']
+girls = top1000[top1000.sex == 'F']
+
+total_births = top1000.pivot_table('births', rows='year', cols='name', aggfunc=sum)
+total_births
+
+subset = total_births[['John', 'Harry', 'Mary', 'Marilyn']]
+subset.plot(subplots=True, figsize=(12, 10), grid=False, title="Number of births per year")
+plt.show()
+
+table = top1000.pivot_table('prop', rows='year', cols='sex', aggfunc=sum)
+table.plot(title='Sum of table1000.prop by year and sex', yticks=np.linspace(0, 1.2, 13), xticks=range(1880, 2020, 10))
+plt.show()
+
+df = boys[boys.year == 2010]
+df
+
+prop_cumsum = df.sort_index(by='prop', ascending=False).prop.cumsum()
+prop_cumsum[:10]
+prop_cumsum.values.searchsorted(0.5)
+
+df = boys[boys.year == 1900]
+in1900 = df.sort_index(by='prop', ascending=False).prop.cumsum()
+in1900.values.searchsorted(0.5) + 1
+
+def get_quantile_count(group, q=0.5):
+    group = group.sort_index(by='prop', ascending=False)
+    return group.prop.cumsum().values.searchsorted(q) + 1
+
+diversity = top1000.groupby(['year', 'sex']).apply(get_quantile_count)
+diversity = diversity.unstack('sex')
+diversity.head()
+diversity.plot(title="Number of popular names in top 50%")
+plt.show()
