@@ -231,3 +231,41 @@ diversity = diversity.unstack('sex')
 diversity.head()
 diversity.plot(title="Number of popular names in top 50%")
 plt.show()
+
+# extract last letter from name column
+get_last_letter = lambda x: x[-1]
+last_letters = names.name.map(get_last_letter)
+last_letters.name = 'last_letter'
+table = names.pivot_table('births', rows=last_letters, cols=['sex', 'year'], aggfunc=sum)
+
+subtable = table.reindex(columns=[1910, 1960, 2010], level='year')
+subtable.head()
+subtable.sum()
+letter_prop = subtable / subtable.sum().astype(float)
+
+import matplotlib.pyplot as plt
+fig, axes = plt.subplots(2, 1, figsize=(10, 8))
+letter_prop['M'].plot(kind='bar', rot=0, ax=axes[0], title='Male')
+letter_prop['F'].plot(kind='bar', rot=0, ax=axes[1], title='Female', legend=False)
+plt.show()
+
+letter_prop = table / table.sum().astype(float)
+dny_ts = letter_prop.ix[['d', 'n', 'y'], 'M'].T
+dny_ts.head()
+
+dny_ts.plot()
+plt.show()
+
+all_names = top1000.name.unique()
+mask = np.array(['lesl' in x.lower() for x in all_names])
+lesley_like = all_names[mask]
+lesley_like
+filtered = top1000[top1000.name.isin(lesley_like)]
+filtered.groupby('name').births.sum()
+
+table = filtered.pivot_table('births', rows='year', cols='sex', aggfunc='sum')
+table = table.div(table.sum(1), axis=0)
+table.tail()
+table.plot(style={'M': 'k-', 'F': 'k--'})
+plt.show()
+
