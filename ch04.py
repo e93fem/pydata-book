@@ -238,3 +238,64 @@ sorted(set(names))
 
 values = np.array([6, 0, 0, 3, 2, 5, 6])
 np.in1d(values, [2, 3, 6])
+
+arr = np.arange(10)
+np.save('some_array', arr)
+np.load('some_array.npy')
+
+np.savez('array_archive.npz', a=arr, b=arr)
+arch = np.load('array_archive.npz')
+arch['b']
+
+!more array_ex.txt
+arr = np.loadtxt('array_ex.txt', delimiter=',')
+arr
+
+x = np.array([[1., 2., 3.], [4., 5., 6.]])
+y = np.array([[6., 23.], [-1, 7], [8, 9]])
+x
+y
+x.dot(y) # equivalently np.dot(x, y)
+np.dot(x, np.ones(3))
+
+from numpy.linalg import inv, qr
+X = np.random.randn(5, 4)
+mat = X.T.dot(X)
+inv(mat)
+mat.dot(inv(mat))
+q, r = qr(mat)
+r
+
+samples = np.random.normal(size=(4, 4))
+samples
+
+from random import normalvariate
+N = 1000000
+%timeit samples = [normalvariate(0, 1) for _ in xrange(N)]
+%timeit np.random.normal(size=N)
+
+import random
+position = 0
+walk = [position]
+steps = 1000
+for i in xrange(steps):
+    step = 1 if random.randint(0, 1) else -1
+    position += step
+    walk.append(position)
+
+import matplotlib.pyplot as plt
+plt.plot(walk)
+plt.ylabel('Random walk')
+plt.show()
+
+nsteps = 1000
+draws = np.random.randint(0, 2, size=nsteps)
+steps = np.where(draws > 0, 1, -1)
+walk = steps.cumsum()
+plt.plot(walk)
+plt.ylabel('Random walk')
+plt.show()
+
+walk.min()
+walk.max()
+(np.abs(walk) >= 10).argmax()
