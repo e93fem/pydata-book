@@ -299,3 +299,22 @@ plt.show()
 walk.min()
 walk.max()
 (np.abs(walk) >= 10).argmax()
+
+nwalks = 5000
+nsteps = 1000
+draws = np.random.randint(0, 2, size=(nwalks, nsteps)) # 0 or 1
+steps = np.where(draws > 0, 1, -1)
+walks = steps.cumsum(1)
+walks
+
+plt.plot(walks)
+plt.ylabel('Random walks')
+plt.show()
+
+walks.max()
+walks.min()
+hits30 = (np.abs(walks) >= 30).any(1)
+hits30
+hits30.sum() # Number that hit 30 or -30
+crossing_times = (np.abs(walks[hits30]) >= 30).argmax(1)
+crossing_times.mean()
