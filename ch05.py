@@ -98,3 +98,16 @@ frame3.values
 frame2.values
 frame2.index
 frame2
+
+obj = Series(range(3), index=['a', 'b', 'c'])
+obj
+index = obj.index
+index
+index[1:]
+index = pd.Index(np.arange(3))
+obj2 = Series([1.5, -2.5, 0], index=index)
+obj2.index is index
+
+frame3
+'Ohio' in frame3.columns
+2003 in frame3.index
